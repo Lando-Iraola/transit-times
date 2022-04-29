@@ -1,0 +1,3 @@
+#using these to avoid installing node on this machine
+docker run -d -it --name npm-initter --mount type=bind,source="$(pwd)/transit-data-scrapper"/,target=/app node:18
+docker exec -it npm-initter /bin/bash
