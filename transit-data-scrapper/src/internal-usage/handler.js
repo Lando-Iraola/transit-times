@@ -8,36 +8,68 @@ async function Handle(busNumber = "C18")
 
     const firstLine = Object.keys(lines[busKey].lines)[0];
     
-    const stops = Object.keys(lines[busKey].lines[firstLine].stops);
+    let stops = Object.keys(lines[busKey].lines[firstLine].stops);
     
-    let originalStop = stops[Math.floor((stops.length - 1) / 2)];
-
     const token = await extractToken();
     const information = []
-    const fullStops = lines[busKey].lines[firstLine].stops;
-    let stop = originalStop;
-    for(let i = 0; i < 2; i++)
+    
+    let stopObj = lines[busKey].lines[firstLine].stops;
+    let stop = stops[0];
+    let arr = [];
+    const pt = previousTwo(stop, stopObj)
+    arr = arr.concat(pt);
+    arr.push(stop);
+    const nt = nextTwo(stop, stopObj);
+    arr = arr.concat(nt);
+
+    for(let i = 0; i < arr.length; i++)
     {
-        console.log(`Previous: ${i}`);
-        if(fullStops[stop].previous)
-        {
-            stop = fullStops[stop].previous
-            information.push(await getBusData(token, stop, busNumber));
-        }
+        information.push(await getBusData(token, arr[i], busNumber));    
     }
-    stop = originalStop;
-    information.push(await getBusData(token, stop, busNumber));
-    for(let i = 0; i < 2; i++)
-    {
-        console.log(`next: ${i}`);
-        if(fullStops[stop].next)
-        {
-            stop = fullStops[stop].next
-            information.push(await getBusData(token, stop, busNumber));
-        }
-    }    
     
     return information;
+}
+
+function previousTwo(stop, stops)
+{
+    let previous;
+    let arr = [];
+    if(!stops[stop].previous)
+        return arr;
+        
+    if(stops[stop].previous)
+    {
+        previous = stops[stop].previous;
+    }
+    if(previous && stops[previous].previous)
+    {
+        previous = stops[previous].previous;
+        arr.push(previous);
+        previous = stops[previous].next;
+        arr.push(previous);
+    }
+    else
+    {
+        arr.push(previous);
+    }
+
+    return arr;
+}
+
+function nextTwo(stop, stops)
+{
+    let next = stops[stop].next;
+    let arr = []
+    for(let i = 0; i < 2; i++)
+    {
+        if(!next)
+            break;
+        
+        next = stops[next].next;
+        arr.push(next);
+    }
+
+    return arr;
 }
 
 function saveFile(newText, filePath = "lines.json")
