@@ -1,24 +1,19 @@
 const {getBusData, extractToken} = require("./../external-data-extraction/ongoingService");
 const {getBusStops, getLinesByBus} = require("./../external-data-extraction/stops");
 
-async function Handle(busNumber = "321")
+async function Handle(busNumber = "c18")
 {
-    const token = await extractToken();
-
-    const lines = await getLinesByBus();
+    const lines = await getLinesByBus(busNumber);
     const busKey = Object.keys(lines)[0];
-    console.log("bus key", busKey);
 
     const firstLine = Object.keys(lines[busKey].lines)[0];
-    console.log("first line", firstLine);
 
     const stops = Object.keys(lines[busKey].lines[firstLine].stops);
-    console.log("stops", stops);
+    console.log(stops);
+    const stop = stops[Math.floor((stops.length - 1) / 2)];
+    console.log(stop);
 
-    const stop = stops[stops.length / 2];
-    
-    console.log("stop", stop);
-
+    const token = await extractToken();
     const information = await getBusData(token, stop);
     return information.servicios;
 }

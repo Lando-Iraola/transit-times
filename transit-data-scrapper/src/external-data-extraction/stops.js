@@ -22,6 +22,7 @@ async function getBusStops()
  */
 async function getLinesByBus(bus = "321")
 {
+   bus = formatBusNumber(bus);
    const linesByBus = `https://www.red.cl/restservice_v2/rest/conocerecorrido?codsint=${bus}`;
    
    let lines;
@@ -34,6 +35,29 @@ async function getLinesByBus(bus = "321")
    extractStops(lines.regreso, bus, alterObject);
 
    return alterObject;
+}
+
+/**
+ * In Chile, bus numbers start with capital letters and end with lower case letters should they have any
+ * @param {*} bus bus number
+ * @returns formated bus number
+ */
+function formatBusNumber(bus)
+{
+   bus = bus.toUpperCase();
+   let splitNumber = bus.split("");
+   let lastIndex = splitNumber.length - 1;
+   lastChar = splitNumber[lastIndex];
+
+   if(isNaN(lastChar))
+   {
+      console.log(lastChar);
+      lastChar = lastChar.toLowerCase();
+      splitNumber[lastIndex] = lastChar;
+      bus = splitNumber.join("");
+   }
+
+   return bus;
 }
 
 /**
@@ -50,8 +74,6 @@ function extractStops(dataToProcess, bus, alterObject)
       throw Error("Failed bus lines data extraction. No bus specified");
    if(!alterObject)
       throw Error("Failed bus lines data extraction. No object reference for modification given");;
-
-   bus = bus.toLowerCase();
 
    dataToProcess.paraderos.forEach(
       paradero =>
