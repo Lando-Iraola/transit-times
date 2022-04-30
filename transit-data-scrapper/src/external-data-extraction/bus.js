@@ -16,4 +16,27 @@ async function getServiceLines()
    return lines;
 }
 
-module.exports = {getServiceLines}
+/**
+ * In Chile, bus numbers start with capital letters and end with lower case letters should they have any
+ * @param {*} bus bus number
+ * @returns formated bus number
+ */
+ function formatBusNumber(bus)
+ {
+    bus = bus.toUpperCase();
+    let splitNumber = bus.split("");
+    let lastIndex = splitNumber.length - 1;
+    lastChar = splitNumber[lastIndex];
+ 
+    if(isNaN(lastChar))
+    {
+       lastChar = lastChar.toLowerCase();
+       splitNumber[lastIndex] = lastChar;
+       bus = splitNumber.join("");
+    }
+ 
+    return bus;
+ }
+ 
+
+module.exports = {getServiceLines, formatBusNumber}

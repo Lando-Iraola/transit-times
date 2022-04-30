@@ -1,3 +1,4 @@
+const {formatBusNumber} = require("./bus");
 /**
  * Get the HTML body of red.cl
  * @returns HTML string
@@ -34,7 +35,7 @@ async function extractToken()
  * @param {*} token is a jwt token required by the red.cl API
  * @returns object containing the API's data
  */
-async function getBusData(token, stop)
+async function getBusData(token, stop, bus)
 {
     const url = `https://www.red.cl/predictor/prediccion?t=${token}&codsimt=${stop}&codser=`;
     const fetch = require('node-fetch');
@@ -42,8 +43,49 @@ async function getBusData(token, stop)
     await fetch(url)
     .then(response => response.json())
     .then(data => busData = data);
- 
+    
+    busData = cleanData(busData, bus, stop);
+
     return busData;
+}
+
+/**
+ * This will transform the ongoing data into something more desirable to this application
+ * The original data is too messy for me
+ * @param {*} data Source this from red.cl
+ * @param {*} bus The bus number
+ * @param {*} stop The stop code
+ * @returns Object with ongoing bus data
+ */
+function cleanData(data, bus, stop)
+{
+    bus = formatBusNumber(bus);
+    data = data.servicios.item.filter(b => b.servicio === bus)[0];
+
+    let newFormat = 
+    {
+        [`${stop}-${bus}`]:
+        {
+            bus,
+            stop,
+            date: new Date().toISOString(),
+            vehicle:
+            [
+                {
+                    distanceFromStop: data.distanciabus1,
+                    timeUntilArrival: data.horaprediccionbus1,
+                    licensePlate: data.ppubus1
+                },
+                {
+                    distanceFromStop: data.distanciabus2,
+                    timeUntilArrival: data.horaprediccionbus2,
+                    licensePlate: data.ppubus2
+                }
+            ]
+        }
+    }
+
+    return newFormat;
 }
 
 module.exports =

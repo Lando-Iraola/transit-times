@@ -1,3 +1,4 @@
+const {formatBusNumber} = require("./bus");
 /**
  * Extracts bus line data from red.cl
  * @param {*} bus number of the bus
@@ -21,28 +22,6 @@ async function getLinesByBus(bus)
    addNeighboringStops(alterObject);
 
    return alterObject;
-}
-
-/**
- * In Chile, bus numbers start with capital letters and end with lower case letters should they have any
- * @param {*} bus bus number
- * @returns formated bus number
- */
-function formatBusNumber(bus)
-{
-   bus = bus.toUpperCase();
-   let splitNumber = bus.split("");
-   let lastIndex = splitNumber.length - 1;
-   lastChar = splitNumber[lastIndex];
-
-   if(isNaN(lastChar))
-   {
-      lastChar = lastChar.toLowerCase();
-      splitNumber[lastIndex] = lastChar;
-      bus = splitNumber.join("");
-   }
-
-   return bus;
 }
 
 /**
@@ -156,7 +135,7 @@ function addNeighboringStops(alterObject)
          const alteringBusStop = stops[busStop];
          const nextOrder = alteringBusStop.stopOrder + 1;
          const previousOrder = alteringBusStop.stopOrder - 1;
-         
+
          findNeighboringStops(alteringBusStop, stops, nextOrder, previousOrder);
       }
    }
