@@ -10,10 +10,36 @@ async function Handle(busNumber = "C18")
     
     const stops = Object.keys(lines[busKey].lines[firstLine].stops);
     
-    let stop = stops[Math.floor((stops.length - 1) / 2)];
+    let originalStop = stops[Math.floor((stops.length - 1) / 2)];
 
     const token = await extractToken();
-    const information = await getBusData(token, stop, busNumber);
+    const information = []
+    const fullStops = lines[busKey].lines[firstLine].stops;
+    let stop = originalStop;
+    for(let i = 0; i < 2; i++)
+    {
+        console.log(`Previous: ${i}`);
+        if(fullStops[stop].previous)
+        {
+            stop = fullStops[stop].previous
+            information.push(await getBusData(token, stop, busNumber));
+        }
+    }
+    stop = originalStop;
+    information.push(await getBusData(token, stop, busNumber));
+    for(let i = 0; i < 2; i++)
+    {
+        console.log(`next: ${i}`);
+        if(fullStops[stop].next)
+        {
+            stop = fullStops[stop].next
+            information.push(await getBusData(token, stop, busNumber));
+        }
+    }
+    
+    
+    
+
     
     return information;
 }
