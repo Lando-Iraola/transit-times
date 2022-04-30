@@ -16,9 +16,9 @@ async function getBusStops()
 }
 
 /**
- * 
- * @param {*} bus 
- * @returns 
+ * Extracts bus line data from red.cl
+ * @param {*} bus number of the bus
+ * @returns object with lines data
  */
 async function getLinesByBus(bus = "321")
 {
@@ -51,7 +51,7 @@ function extractStops(dataToProcess, bus, alterObject)
    if(!alterObject)
       throw Error("Failed bus lines data extraction. No object reference for modification given");;
 
-    bus = bus.toUpperCase();
+    bus = bus.toLowerCase();
 
     dataToProcess.paraderos.forEach(
         paradero =>
