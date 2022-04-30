@@ -29,11 +29,11 @@ async function extractToken()
     return atob(token); //They do this on the website I'm taking the data from. The token comes in base64 apparently
 }
  
- /**
-  * Gets data for a specified bus stop
-  * @param {*} token is a jwt token required by the red.cl API
-  * @returns object containing the API's data
-  */
+/**
+ * Gets data for a specified bus stop
+ * @param {*} token is a jwt token required by the red.cl API
+ * @returns object containing the API's data
+ */
 async function getBusData(token, stop)
 {
     const url = `https://www.red.cl/predictor/prediccion?t=${token}&codsimt=${stop}&codser=`;
