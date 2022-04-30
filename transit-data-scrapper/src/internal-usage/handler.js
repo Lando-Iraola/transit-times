@@ -35,11 +35,7 @@ async function Handle(busNumber = "C18")
             stop = fullStops[stop].next
             information.push(await getBusData(token, stop, busNumber));
         }
-    }
-    
-    
-    
-
+    }    
     
     return information;
 }
