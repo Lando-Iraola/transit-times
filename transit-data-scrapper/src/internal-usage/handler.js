@@ -1,15 +1,22 @@
 const {getBusData, extractToken} = require("./../external-data-extraction/ongoingService");
 const {getLinesByBus} = require("./../external-data-extraction/stops");
 
-async function Handle(busNumber = "c18", stop = "PB1489")
+async function Handle(busNumber = "c18", stop = "pc70")
 {
     const lines = await getLinesByBus(busNumber);
-    const busKey = Object.keys(lines)[0];
 
-    const firstLine = Object.keys(lines[busKey].lines)[0];
+    const busKey = Object.keys(lines)[0];
+    stop = stop.toUpperCase();
+    let lineName = "";
+    console.log(stop);
+    for(line in lines[busKey].lines)
+    {
+        if(lines[busKey].lines[line].stops[stop])
+            lineName = line;
+    }
         
     const information = [] 
-    let stops = lines[busKey].lines[firstLine].stops;
+    let stops = lines[busKey].lines[lineName].stops;
     let arr = [];
     arr = arr.concat(previousTwo(stop, stops))
     arr.push(stop);
