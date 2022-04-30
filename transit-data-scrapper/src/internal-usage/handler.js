@@ -1,30 +1,34 @@
 const {getBusData, extractToken} = require("./../external-data-extraction/ongoingService");
 const {getLinesByBus} = require("./../external-data-extraction/stops");
 
-async function Handle(busNumber = "C18")
+async function Handle(busNumber = "c18", stop = "PB1489")
 {
     const lines = await getLinesByBus(busNumber);
     const busKey = Object.keys(lines)[0];
 
     const firstLine = Object.keys(lines[busKey].lines)[0];
-    
-    let stops = Object.keys(lines[busKey].lines[firstLine].stops);
-    
-    const token = await extractToken();
-    const information = []
-    
-    let stopObj = lines[busKey].lines[firstLine].stops;
-    let stop = stops[0];
+        
+    const information = [] 
+    let stops = lines[busKey].lines[firstLine].stops;
     let arr = [];
-    const pt = previousTwo(stop, stopObj)
-    arr = arr.concat(pt);
+    arr = arr.concat(previousTwo(stop, stops))
     arr.push(stop);
-    const nt = nextTwo(stop, stopObj);
-    arr = arr.concat(nt);
-
+    arr = arr.concat(nextTwo(stop, stops));
+    
+    console.log(arr)
+    const token = await extractToken();
+    console.log(token);
     for(let i = 0; i < arr.length; i++)
     {
-        information.push(await getBusData(token, arr[i], busNumber));    
+        try
+        {
+            information.push(await getBusData(token, arr[i], busNumber));    
+        }
+        catch(e)
+        {
+            console.error(`Bus: ${busNumber}, stop: ${arr[i]} Red.cl endpoint did not work for these`)
+            console.error(e);
+        }
     }
     
     return information;
@@ -48,10 +52,6 @@ function previousTwo(stop, stops)
         previous = stops[previous].next;
         arr.push(previous);
     }
-    else
-    {
-        arr.push(previous);
-    }
 
     return arr;
 }
@@ -60,13 +60,14 @@ function nextTwo(stop, stops)
 {
     let next = stops[stop].next;
     let arr = []
+  
     for(let i = 0; i < 2; i++)
     {
         if(!next)
             break;
-        
-        next = stops[next].next;
+
         arr.push(next);
+        next = stops[next].next;
     }
 
     return arr;
