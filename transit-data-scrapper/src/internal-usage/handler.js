@@ -7,11 +7,10 @@ async function Handle(busNumber = "c18")
     const busKey = Object.keys(lines)[0];
 
     const firstLine = Object.keys(lines[busKey].lines)[0];
-
+    
     const stops = Object.keys(lines[busKey].lines[firstLine].stops);
-    console.log(stops);
+    
     const stop = stops[Math.floor((stops.length - 1) / 2)];
-    console.log(stop);
 
     const token = await extractToken();
     const information = await getBusData(token, stop);

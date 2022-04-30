@@ -3,7 +3,7 @@
  * @param {*} bus number of the bus
  * @returns object with lines data
  */
-async function getLinesByBus(bus = "321")
+async function getLinesByBus(bus)
 {
    bus = formatBusNumber(bus);
    const linesByBus = `https://www.red.cl/restservice_v2/rest/conocerecorrido?codsint=${bus}`;
@@ -17,6 +17,8 @@ async function getLinesByBus(bus = "321")
    const alterObject = {};
    extractStops(lines.ida, bus, alterObject);
    extractStops(lines.regreso, bus, alterObject);
+
+   addNeighboringStops(alterObject);
 
    return alterObject;
 }
@@ -35,7 +37,6 @@ function formatBusNumber(bus)
 
    if(isNaN(lastChar))
    {
-      console.log(lastChar);
       lastChar = lastChar.toLowerCase();
       splitNumber[lastIndex] = lastChar;
       bus = splitNumber.join("");
@@ -53,95 +54,140 @@ function formatBusNumber(bus)
 function extractStops(dataToProcess, bus, alterObject)
 {
    if(!dataToProcess)
-      throw Error("Failed bus lines data extraction. No data received");
+      throw Error("Failed bus lines data extraction. \nNo data received");
    if(!bus)
-      throw Error("Failed bus lines data extraction. No bus specified");
+      throw Error("Failed bus lines data extraction. \nNo bus specified");
    if(!alterObject)
-      throw Error("Failed bus lines data extraction. No object reference for modification given");;
+      throw Error("Failed bus lines data extraction. \nNo object reference for modification given");
 
    dataToProcess.paraderos.forEach(
       paradero =>
       {
          paradero.servicios.forEach(
-               servicio =>
+            servicio =>
+            {
+               if(servicio.cod != bus)
+                  return;
+
+               if(!alterObject[servicio.cod])
                {
-                  if(servicio.cod != bus)
-                     return;
-   
-                  if(!alterObject[servicio.cod])
+                  alterObject[servicio.cod] = {};
+                  alterObject[servicio.cod].bus = servicio.cod;
+                  alterObject[servicio.cod].lines = {};
+               }
+
+               if(!alterObject[servicio.cod].lines[servicio.destino] && servicio.destino.toLowerCase() !== "fin de recorrido")
+               {
+                  alterObject[servicio.cod].lines[servicio.destino] = 
                   {
-                     alterObject[servicio.cod] = {};
-                     alterObject[servicio.cod].bus = servicio.cod;
-                     alterObject[servicio.cod].lines = {};
-                  }
-   
-                  if(!alterObject[servicio.cod].lines[servicio.destino] && servicio.destino.toLowerCase() !== "fin de recorrido")
-                  {
-                     alterObject[servicio.cod].lines[servicio.destino] = 
-                     {
-                           destination: servicio.destino,
-                           stops: 
+                        destination: servicio.destino,
+                        stops: 
+                        {
+                           [paradero.cod] :
                            {
-                              [paradero.cod] :
-                              {
-                                 stop : paradero.cod,
-                                 stopOrder : servicio.orden,
-                                 commune: paradero.comuna,
-                                 geoLocation: paradero.pos,
-                                 street: paradero.name,
-                                 endOfTrip: false
-                              }
+                              stop : paradero.cod,
+                              stopOrder : servicio.orden,
+                              commune: paradero.comuna,
+                              geoLocation: paradero.pos,
+                              street: paradero.name,
+                              endOfTrip: false
                            }
-                     }
-                  }
-                  else if(servicio.destino.toLowerCase() !== "fin de recorrido")
-                  {
-                     alterObject[servicio.cod]
-                     .lines[servicio.destino]
-                     .stops[paradero.cod] =
-                     {
-                           stop : paradero.cod,
-                           stopOrder : servicio.orden,
-                           commune: paradero.comuna,
-                           geoLocation: paradero.pos,
-                           street: paradero.name,
-                           endOfTrip: false
-                     }
-                     
-                  }
-                  else
-                  {
-                     const entries = Object.keys(alterObject[bus].lines);
-                     for(let i = 0; i < entries.length; i++)
-                     {
-                           let communeEntry = Object.keys(alterObject[bus].lines[entries[i]].stops);
-                           communeEntry = communeEntry[communeEntry.length - 1];
-                           if(alterObject[bus].lines[entries[i]].stops[communeEntry].commune === paradero.comuna)
-                           {
-                              alterObject[servicio.cod]
-                              .lines[entries[i]]
-                              .stops[paradero.cod] =
-                              {
-                                 stop : paradero.cod,
-                                 stopOrder : servicio.orden,
-                                 commune: paradero.comuna,
-                                 geoLocation: paradero.pos,
-                                 street: paradero.name,
-                                 endOfTrip: true
-                              }
-                              break;
-                           }
-                     }
-                     
+                        }
                   }
                }
+               else if(servicio.destino.toLowerCase() !== "fin de recorrido")
+               {
+                  alterObject[servicio.cod]
+                  .lines[servicio.destino]
+                  .stops[paradero.cod] =
+                  {
+                        stop : paradero.cod,
+                        stopOrder : servicio.orden,
+                        commune: paradero.comuna,
+                        geoLocation: paradero.pos,
+                        street: paradero.name,
+                        endOfTrip: false
+                  }
+                  
+               }
+               else
+               {
+                  const entries = Object.keys(alterObject[bus].lines);
+                  for(let i = 0; i < entries.length; i++)
+                  {
+                        let communeEntry = Object.keys(alterObject[bus].lines[entries[i]].stops);
+                        communeEntry = communeEntry[communeEntry.length - 1];
+                        if(alterObject[bus].lines[entries[i]].stops[communeEntry].commune === paradero.comuna)
+                        {
+                           alterObject[servicio.cod]
+                           .lines[entries[i]]
+                           .stops[paradero.cod] =
+                           {
+                              stop : paradero.cod,
+                              stopOrder : servicio.orden,
+                              commune: paradero.comuna,
+                              geoLocation: paradero.pos,
+                              street: paradero.name,
+                              endOfTrip: true
+                           }
+                           break;
+                        }
+                  }
+                  
+               }
+            }
          )
       }
    )
 }
 
+function addNeighboringStops(alterObject)
+{
+   if(!alterObject)
+      throw Error("Failed bus lines data extraction. \nCouldn't add neighbaring stops data. \nNo object reference for modification given");
+   
+   const busNumber = Object.keys(alterObject)[0];
+   for(line in alterObject[busNumber].lines)
+   {
+      const alteringLine = alterObject[busNumber].lines[line];
+      const stops = alteringLine.stops;
+      for(busStop in stops)
+      {
+         const alteringBusStop = stops[busStop];
+         const nextOrder = alteringBusStop.stopOrder + 1;
+         const previousOrder = alteringBusStop.stopOrder - 1;
+         
+         findNeighboringStops(alteringBusStop, stops, nextOrder, previousOrder);
+      }
+   }
+}
+
+function findNeighboringStops(stopUnderAlteration, stops, next, previous)
+{
+   if(previous === 0)
+      stopUnderAlteration.previous = null;
+
+   for(busStop in stops)
+   {
+      if(busStop === stopUnderAlteration.stop)
+         continue;      
+
+      if(stopUnderAlteration.hasOwnProperty("previous") && stopUnderAlteration.hasOwnProperty("next"))
+         break;
+      
+      if(stops[busStop].stopOrder === next)
+         stopUnderAlteration.next = busStop;
+      if(stops[busStop].stopOrder === previous)
+         stopUnderAlteration.previous = busStop;
+   }
+
+   if(!stopUnderAlteration.hasOwnProperty("next"))
+   {
+      stopUnderAlteration.next = null;
+   }
+}
+
 module.exports = 
 {
-   getBusStops,
    getLinesByBus
 }
