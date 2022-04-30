@@ -1,5 +1,5 @@
 const {getBusData, extractToken} = require("./../external-data-extraction/ongoingService");
-const {getBusStops, getLinesByBus} = require("./../external-data-extraction/stops");
+const {getLinesByBus} = require("./../external-data-extraction/stops");
 
 async function Handle(busNumber = "c18")
 {

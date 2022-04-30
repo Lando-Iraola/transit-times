@@ -1,20 +1,3 @@
-const fetch = require('node-fetch');
-/**
- * Fetch the bus stops names available
- * @returns Array with the available bus stops names
- */
-async function getBusStops()
-{
-   const busStops = `https://www.red.cl/restservice_v2/rest/getparadas/all`;
-
-   let lines;
-   await fetch(busStops)
-   .then(response => response.json())
-   .then(data => lines = data);
-   
-   return lines;
-}
-
 /**
  * Extracts bus line data from red.cl
  * @param {*} bus number of the bus
@@ -25,6 +8,7 @@ async function getLinesByBus(bus = "321")
    bus = formatBusNumber(bus);
    const linesByBus = `https://www.red.cl/restservice_v2/rest/conocerecorrido?codsint=${bus}`;
    
+   const fetch = require('node-fetch');
    let lines;
    await fetch(linesByBus)
    .then(response => response.json())
