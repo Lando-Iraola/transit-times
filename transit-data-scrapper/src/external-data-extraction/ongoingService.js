@@ -62,11 +62,11 @@ function cleanData(data, bus, stop)
     bus = formatBusNumber(bus);
     data = data.servicios.item.filter(b => b.servicio.toLowerCase() === bus.toLowerCase())[0];
 
-    const first = extractTime(data.horaprediccionbus1);
-    const second = extractTime(data.horaprediccionbus2);
+    
     let vehicle = [];
     if(data.ppubus1)
     {
+        const first = extractTime(data.horaprediccionbus1);
         vehicle.push(
             {
                 distanceFromStop: data.distanciabus1,
@@ -77,6 +77,7 @@ function cleanData(data, bus, stop)
     }
     if(data.ppubus2)
     {
+        const second = extractTime(data.horaprediccionbus2);
         vehicle.push(
             {
                 distanceFromStop: data.distanciabus2,
@@ -85,6 +86,7 @@ function cleanData(data, bus, stop)
             }
         );
     }
+    
     let newFormat = 
     {
         [`${stop}-${bus}`]:
