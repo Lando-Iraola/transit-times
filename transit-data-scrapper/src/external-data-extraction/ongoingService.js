@@ -60,7 +60,7 @@ async function getBusData(token, stop, bus)
 function cleanData(data, bus, stop)
 {
     bus = formatBusNumber(bus);
-    data = data.servicios.item.filter(b => b.servicio === bus)[0];
+    data = data.servicios.item.filter(b => b.servicio.toLowerCase() === bus.toLowerCase())[0];
 
     const first = extractTime(data.horaprediccionbus1);
     const second = extractTime(data.horaprediccionbus2);
