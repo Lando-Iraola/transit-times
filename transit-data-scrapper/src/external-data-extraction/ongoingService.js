@@ -96,9 +96,10 @@ function extractTime(timeString)
 
     let low = null;
     let high = null;
-    let regexMatch = timeString.match(lookFor);
-    if(timeString)
+    
+    if(timeString !== null)
     {
+        let regexMatch = timeString.match(lookFor);
         if(timeString.includes("Menos"))
         {
             low = 0;
