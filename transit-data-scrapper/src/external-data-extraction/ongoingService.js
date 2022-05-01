@@ -114,18 +114,25 @@ function extractTime(timeString)
     let low = null;
     let high = null;
     
+    const busIs = {onSight: "Llegando.", tooFar:"Mas", close: "menos"};
+
     if(timeString !== null)
     {
         let regexMatch = timeString.match(lookFor);
-        if(timeString.includes("Menos"))
+        if(timeString.includes(busIs.close))
         {
             low = 0;
             high = parseInt(regexMatch[0], 10);
         }
-        else if(timeString === "Llegando.")
+        else if(timeString.includes(busIs.tooFar))
+        {
+            low = parseInt(regexMatch[0], 10);
+            high = low * 2;
+        }
+        else if(timeString.includes(busIs.onSight))
         {
             low = 0;
-            high = 3;
+            high = 1;
         }
         else
         {
