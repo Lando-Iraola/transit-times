@@ -114,7 +114,8 @@ function extractTime(timeString)
     let low = null;
     let high = null;
     
-    const busIs = {onSight: "Llegando.", tooFar:"Mas", close: "menos"};
+    timeString = timeString.toLowerCase();
+    const busIs = {onSight: "llegando.", tooFar:"mas", close: "menos"};
 
     if(timeString !== null)
     {
