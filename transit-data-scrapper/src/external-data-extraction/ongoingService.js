@@ -64,6 +64,27 @@ function cleanData(data, bus, stop)
 
     const first = extractTime(data.horaprediccionbus1);
     const second = extractTime(data.horaprediccionbus2);
+    let vehicle = [];
+    if(data.ppubus1)
+    {
+        vehicle.push(
+            {
+                distanceFromStop: data.distanciabus1,
+                estimatedTimeUntilArrival: {...first},
+                licensePlate: data.ppubus1
+            }
+        );
+    }
+    if(data.ppubus2)
+    {
+        vehicle.push(
+            {
+                distanceFromStop: data.distanciabus2,
+                estimatedTimeUntilArrival: {...second},
+                licensePlate: data.ppubus2
+            }
+        );
+    }
     let newFormat = 
     {
         [`${stop}-${bus}`]:
@@ -71,25 +92,19 @@ function cleanData(data, bus, stop)
             bus,
             stop,
             date: new Date().toISOString(),
-            vehicle:
-            [
-                {
-                    distanceFromStop: data.distanciabus1,
-                    estimatedTimeUntilArrival: {...first, unit: "minutes"},
-                    licensePlate: data.ppubus1
-                },
-                {
-                    distanceFromStop: data.distanciabus2,
-                    estimatedTimeUntilArrival: {...second, unit: "minutes"},
-                    licensePlate: data.ppubus2
-                }
-            ]
+            vehicle
         }
     }
 
     return newFormat;
 }
-
+/**
+ * Extracts the minutes from the incoming data. 
+ * Also, it assumes some numerical values given some 
+ * constant strings the service sends.
+ * @param {*} timeString string containing a description of when the bus might arrive
+ * @returns Object with integers depicting a range of time in minutes
+ */
 function extractTime(timeString)
 {
     let lookFor = /(\d+)/g;
@@ -117,7 +132,7 @@ function extractTime(timeString)
         }
     }
 
-    return {low, high}
+    return {low, high, unit: "minutes"}
 }
 module.exports =
 {
