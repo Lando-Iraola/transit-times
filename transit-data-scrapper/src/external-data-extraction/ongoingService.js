@@ -62,6 +62,8 @@ function cleanData(data, bus, stop)
     bus = formatBusNumber(bus);
     data = data.servicios.item.filter(b => b.servicio === bus)[0];
 
+    const first = extractTime(data.horaprediccionbus1);
+    const second = extractTime(data.horaprediccionbus2);
     let newFormat = 
     {
         [`${stop}-${bus}`]:
@@ -73,12 +75,12 @@ function cleanData(data, bus, stop)
             [
                 {
                     distanceFromStop: data.distanciabus1,
-                    timeUntilArrival: data.horaprediccionbus1,
+                    estimatedTimeUntilArrival: {...first, unit: "minutes"},
                     licensePlate: data.ppubus1
                 },
                 {
                     distanceFromStop: data.distanciabus2,
-                    timeUntilArrival: data.horaprediccionbus2,
+                    estimatedTimeUntilArrival: {...second, unit: "minutes"},
                     licensePlate: data.ppubus2
                 }
             ]
@@ -88,6 +90,34 @@ function cleanData(data, bus, stop)
     return newFormat;
 }
 
+function extractTime(timeString)
+{
+    let lookFor = /(\d+)/g;
+
+    let low = null;
+    let high = null;
+    let regexMatch = timeString.match(lookFor);
+    if(timeString)
+    {
+        if(timeString.includes("Menos"))
+        {
+            low = 0;
+            high = parseInt(regexMatch[0], 10);
+        }
+        else if(timeString === "Llegando.")
+        {
+            low = 0;
+            high = 3;
+        }
+        else
+        {
+            low = parseInt(regexMatch[0], 10);
+            high = parseInt(regexMatch[1], 10);
+        }
+    }
+
+    return {low, high}
+}
 module.exports =
 {
     getBusData,
