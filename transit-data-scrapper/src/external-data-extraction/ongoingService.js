@@ -102,23 +102,22 @@ function cleanData(data, bus, stop)
 }
 /**
  * Extracts the minutes from the incoming data. 
- * Also, it assumes some numerical values given some 
- * constant strings the service sends.
+ * Also, it assumes some numerical values given some constant strings the service sends.
  * @param {*} timeString string containing a description of when the bus might arrive
  * @returns Object with integers depicting a range of time in minutes
  */
 function extractTime(timeString)
 {
-    let lookFor = /(\d+)/g;
-
     let low = null;
     let high = null;
     
     timeString = timeString.toLowerCase();
-    const busIs = {onSight: "llegando.", tooFar:"mas", close: "menos"};
-
+    
     if(timeString !== null)
     {
+        const busIs = {onSight: "llegando.", tooFar:"mas", close: "menos"};
+
+        let lookFor = /(\d+)/g;
         let regexMatch = timeString.match(lookFor);
         if(timeString.includes(busIs.close))
         {
