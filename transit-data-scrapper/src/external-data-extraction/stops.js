@@ -63,7 +63,7 @@ function extractStops(dataToProcess, bus)
             commune: paradero.comuna,
             geoLocation: paradero.pos,
             street: paradero.name,
-            endOfTrip: extractingBus.destino === "Fin de recorrido" ? true : false
+            endOfTrip: extractingBus.destino === "Fin de recorrido"
          }
       }
    );
